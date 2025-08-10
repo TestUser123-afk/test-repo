@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBR1EXNMMH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LBR1EXNMMH');
+</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Embed</title>
+  <link rel="stylesheet" href="./stuff.css" />
+
+  <script src="/uv/uv.bundle.js"></script>
+  <script src="/uv/uv.config.js"></script>
+  <script src="/envade/en.config.js"></script>
+  <script src="/envade/en.bundle.js"></script>
+  <script src="/scramjet/scramjet.controller.js"></script>
+
+  <script src="/baremux/index.js"></script>
+</head>
+<body style="margin:0; padding:0; overflow:hidden;">
+  <iframe id="iframe" style="border:none; width:100%; height:100vh;"></iframe>
+
+  <script>
+    const getparam = (n) => new URLSearchParams(location.search).get(n);
+    const url = getparam('url');
+    const px = getparam('proxy') || localStorage.getItem('sproxy') || 'uv';
+    const iframe = document.getElementById('iframe');
+
+    const scramjet = new ScramjetController({
+      prefix: "/service/scramjet/",
+      files: {
+        wasm: "/scramjet/scramjet.wasm.wasm",
+        worker: "/scramjet/scramjet.worker.js",
+        client: "/scramjet/scramjet.client.js",
+        shared: "/scramjet/scramjet.shared.js",
+        sync: "/scramjet/scramjet.sync.js"
+      }
+    });
+
+    const load = async () => {
+      // wisp and transport stuff 
+      const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+      const wisp = location.origin.includes("8080")
+        ? `${location.protocol === "http:" ? "ws:" : "wss:"}//${location.host}/wisp/`
+        : "wss://wisp.terbiumon.top/wisp/";
+
+      await connection.setTransport("/epoxy/index.mjs", [{ wisp }]);
+
+      await scramjet.init();
+
+      let final = url;
+
+      switch (px) {
+        case "uv":
+          if (window.__uv$config?.encodeUrl) {
+            final = window.__uv$config.prefix + window.__uv$config.encodeUrl(url);
+          }
+          break;
+
+        case "envade":
+          if (window.__envade$config?.codec) {
+            final = window.__envade$config.prefix + window.__envade$config.codec.encode(url);
+          }
+          break;
+
+        case "scramjet":
+          final = scramjet.encodeUrl?.(url) || url;
+          break;
+      }
+
+      iframe.src = final;
+    };
+
+    if (url) {
+      load().catch(err => {
+        console.error("embed failed", err);
+        document.body.innerHTML = "<h2>failed to load</h2>";
+      });
+    } else {
+      document.body.innerHTML = "<h2>null</h2>";
+    }
+  </script>
+</body>
+</html>
