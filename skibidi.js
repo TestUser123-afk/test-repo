@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const reloadbtn = document.getElementById("reloadBtn");
 
   const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-  const wisp = {location.protocol === "http:" ? "ws:" :  "wss:"};//${location.host}/wisp/
+  const wisp = `${location.protocol === 'http:' ? 'ws:' : 'wss:'}//${location.host}/wisp/`;
 
   await connection.setTransport("/epoxy/index.mjs", [{ wisp }]);
 
