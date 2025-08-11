@@ -47,11 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forwardbtn = document.getElementById("forwardBtn");
   const reloadbtn = document.getElementById("reloadBtn");
 
-  // wisp and transport stuff
   const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
-  const wisp = location.origin.includes("8080")
-    ? `${location.protocol === "http:" ? "ws:" : "wss:"}//${location.host}/wisp/`
-    : "wss://wisp.terbiumon.top/wisp/";
+  const wisp = {location.protocol === "http:" ? "ws:" :  "wss:"}//${location.host}/wisp/
 
   await connection.setTransport("/epoxy/index.mjs", [{ wisp }]);
 
@@ -70,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     registerServiceWorker(selected);
   });
 
-  // abcdefghijklmnopqrstuvwxyz
   const resolveurl = (inputval) => {
     const trimmed = inputval.trim();
     const searchurl = "https://search.brave.com/search?q=%s";
@@ -105,7 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activetab = null;
   let tabid = 0;
 
-  // Show or hide homepage based on tabs
   function toggleHomepage() {
     if (tabs.length === 0) {
       homepage.style.display = "block";
@@ -251,7 +246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   toggleHomepage();
   updatetabs();
 
-  // Create initial tab if none exist
   if (tabs.length === 0) {
     createtab();
   }
